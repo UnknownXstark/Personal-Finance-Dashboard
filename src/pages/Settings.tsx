@@ -48,7 +48,7 @@ const Settings = () => {
     <div className="flex min-h-screen bg-background">
       <Sidebar userName={userName} />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col ml-60 h-screen overflow-auto">
         <DashboardHeader userName={userName} />
 
         <main className="flex-1 p-8">

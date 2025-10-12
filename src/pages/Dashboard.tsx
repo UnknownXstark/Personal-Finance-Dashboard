@@ -7,11 +7,19 @@ import BalanceChart from "@/components/BalanceChart";
 import TransactionsTable from "@/components/TransactionsTable";
 import InvestmentsChart from "@/components/InvestmentsChart";
 import { Wallet, PiggyBank, TrendingUp } from "lucide-react";
-import { mockDashboardOverview, mockAccounts } from "@/data/mockData";
+import { reportsAPI, accountsAPI } from "@/lib/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("User");
+  const [userId, setUserId] = useState<number>(1);
+  const [loading, setLoading] = useState(true);
+  const [overview, setOverview] = useState({
+    total_balance: 0,
+    total_investments: 0,
+    total_budget: 0,
+  });
+  const [accounts, setAccounts] = useState<any[]>([]);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -22,7 +30,26 @@ const Dashboard = () => {
 
     const userData = JSON.parse(user);
     setUserName(userData.name);
+    setUserId(userData.id || 1);
+
+    fetchDashboardData(userData.id || 1);
   }, [navigate]);
+
+  const fetchDashboardData = async (uid: number) => {
+    try {
+      const [overviewRes, accountsRes] = await Promise.all([
+        reportsAPI.getOverview(uid),
+        accountsAPI.getAll(),
+      ]);
+
+      setOverview(overviewRes.data);
+      setAccounts(accountsRes.data);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -32,43 +59,51 @@ const Dashboard = () => {
         <DashboardHeader userName={userName} />
 
         <main className="flex-1 p-8">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard
-              title="Total Balance"
-              value={`$${mockDashboardOverview.total_balance.toLocaleString()}`}
-              change={mockDashboardOverview.balance_change}
-              icon={Wallet}
-              iconBg="bg-accent/10"
-            />
-            <StatCard
-              title="Main Account"
-              value={`$${mockAccounts[0].balance.toLocaleString()}`}
-              change={2.1}
-              icon={Wallet}
-              iconBg="bg-accent/10"
-            />
-            <StatCard
-              title="Savings"
-              value={`$${mockAccounts[1].balance.toLocaleString()}`}
-              change={10}
-              icon={PiggyBank}
-              iconBg="bg-success/10"
-            />
-          </div>
-
-          {/* Chart and Investments */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2">
-              <BalanceChart />
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading dashboard...</p>
             </div>
-            <div>
-              <InvestmentsChart />
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <StatCard
+                  title="Total Balance"
+                  value={`$${overview.total_balance.toLocaleString()}`}
+                  change={5.2}
+                  icon={Wallet}
+                  iconBg="bg-accent/10"
+                />
+                <StatCard
+                  title="Main Account"
+                  value={`$${accounts[0]?.balance.toLocaleString() || 0}`}
+                  change={2.1}
+                  icon={Wallet}
+                  iconBg="bg-accent/10"
+                />
+                <StatCard
+                  title="Total Investments"
+                  value={`$${overview.total_investments.toLocaleString()}`}
+                  change={10}
+                  icon={TrendingUp}
+                  iconBg="bg-success/10"
+                />
+              </div>
 
-          {/* Transactions Table */}
-          <TransactionsTable />
+              {/* Chart and Investments */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="lg:col-span-2">
+                  <BalanceChart />
+                </div>
+                <div>
+                  <InvestmentsChart />
+                </div>
+              </div>
+
+              {/* Transactions Table */}
+              <TransactionsTable />
+            </>
+          )}
         </main>
       </div>
     </div>

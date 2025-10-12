@@ -33,7 +33,7 @@ const Sidebar = ({ userName }: SidebarProps) => {
   };
 
   return (
-    <aside className="w-60 h-screen bg-sidebar-background text-sidebar-foreground flex flex-col fixed left-0 top-0 z-10">
+    <aside className="w-60 h-screen bg-sidebar text-sidebar-foreground flex flex-col fixed left-0 top-0 z-10">
       {/* Logo */}
       <div className="p-6">
         <h1 className="text-2xl font-bold tracking-tight">vwealty</h1>
