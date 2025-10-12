@@ -1,67 +1,98 @@
-import { LayoutDashboard, Wallet, TrendingUp, FileText, Settings, LogOut, DollarSign } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { NavLink, useNavigate } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Wallet, 
+  TrendingDown, 
+  TrendingUp, 
+  FileText, 
+  Settings,
+  LogOut,
+  MessageCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  userName?: string;
 }
 
-const menuItems = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "budgets", label: "Budgets", icon: DollarSign },
-  { id: "expenses", label: "Expenses", icon: Wallet },
-  { id: "investments", label: "Investments", icon: TrendingUp },
-  { id: "reports", label: "Reports", icon: FileText },
-  { id: "settings", label: "Settings", icon: Settings },
-];
+const Sidebar = ({ userName }: SidebarProps) => {
+  const navigate = useNavigate();
 
-export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
+  const navItems = [
+    { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+    { path: '/budgets', label: 'Budgets', icon: Wallet },
+    { path: '/expenses', label: 'Expenses', icon: TrendingDown },
+    { path: '/investments', label: 'Investments', icon: TrendingUp },
+    { path: '/reports', label: 'Reports', icon: FileText },
+    { path: '/settings', label: 'Settings', icon: Settings }
+  ];
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
-    <aside className="bg-sidebar text-sidebar-foreground w-64 min-h-screen p-6 flex flex-col transition-all duration-300">
-      <div className="mb-12">
-        <h1 className="text-2xl font-bold text-sidebar-primary-foreground flex items-center gap-2">
-          <span className="text-sidebar-primary">v</span>wealty
-        </h1>
+    <aside className="w-60 min-h-screen bg-sidebar-background text-sidebar-foreground flex flex-col">
+      {/* Logo */}
+      <div className="p-6">
+        <h1 className="text-2xl font-bold tracking-tight">vwealty</h1>
       </div>
 
-      <nav className="flex-1 space-y-2">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                activeTab === item.id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground"
-              )}
-            >
-              <Icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+      {/* Navigation */}
+      <nav className="flex-1 px-4">
+        <ul className="space-y-1">
+          {navItems.map((item) => (
+            <li key={item.path}>
+              <NavLink
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth ${
+                    isActive
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  }`
+                }
+              >
+                <item.icon size={20} />
+                <span className="font-medium">{item.label}</span>
+              </NavLink>
+            </li>
+          ))}
+        </ul>
       </nav>
 
-      <div className="mt-auto space-y-4">
-        <div className="bg-sidebar-accent rounded-lg p-4">
-          <h3 className="font-semibold text-sidebar-accent-foreground mb-2">Have a question?</h3>
-          <p className="text-sm text-sidebar-foreground/80 mb-3">
-            Send us a message and we will get back to you in no time.
-          </p>
-          <button className="w-full bg-sidebar-primary text-sidebar-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity">
-            Contact us
-          </button>
+      {/* Help Section */}
+      <div className="p-4 mx-4 mb-6 bg-sidebar-accent rounded-xl">
+        <div className="flex items-start gap-3 mb-3">
+          <MessageCircle size={20} className="mt-1 flex-shrink-0" />
+          <div>
+            <h3 className="font-semibold text-sm mb-1">Have a question?</h3>
+            <p className="text-xs text-sidebar-foreground/70">
+              Send us a message and we will get back to you in no time.
+            </p>
+          </div>
         </div>
+        <Button 
+          size="sm" 
+          className="w-full bg-sidebar-foreground/10 hover:bg-sidebar-foreground/20 text-sidebar-foreground"
+        >
+          Contact us
+        </Button>
+      </div>
 
-        <button className="w-full flex items-center gap-3 px-4 py-3 text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors">
-          <LogOut className="w-5 h-5" />
-          <span>Log out</span>
+      {/* Logout */}
+      <div className="p-4 border-t border-sidebar-border">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent/50 transition-smooth"
+        >
+          <LogOut size={20} />
+          <span className="font-medium">Log out</span>
         </button>
       </div>
     </aside>
   );
 };
+
+export default Sidebar;
