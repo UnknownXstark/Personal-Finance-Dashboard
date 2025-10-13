@@ -1,15 +1,15 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  TrendingDown, 
-  TrendingUp, 
-  FileText, 
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Wallet,
+  TrendingDown,
+  TrendingUp,
+  FileText,
   Settings,
   LogOut,
-  MessageCircle
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+  MessageCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   userName?: string;
@@ -19,21 +19,22 @@ const Sidebar = ({ userName }: SidebarProps) => {
   const navigate = useNavigate();
 
   const navItems = [
-    { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-    { path: '/budgets', label: 'Budgets', icon: Wallet },
-    { path: '/expenses', label: 'Expenses', icon: TrendingDown },
-    { path: '/investments', label: 'Investments', icon: TrendingUp },
-    { path: '/reports', label: 'Reports', icon: FileText },
-    { path: '/settings', label: 'Settings', icon: Settings }
+    { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    { path: "/accounts", label: "Accounts", icon: Wallet },
+    { path: "/budgets", label: "Budgets", icon: Wallet },
+    { path: "/expenses", label: "Expenses", icon: TrendingDown },
+    { path: "/investments", label: "Investments", icon: TrendingUp },
+    { path: "/reports", label: "Reports", icon: FileText },
+    { path: "/settings", label: "Settings", icon: Settings },
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   return (
-    <aside className="w-60 h-screen bg-sidebar text-sidebar-foreground flex flex-col fixed left-0 top-0 z-10">
+    <aside className="w-60 h-screen bg-sidebar-background text-sidebar-foreground flex flex-col fixed left-0 top-0 z-10">
       {/* Logo */}
       <div className="p-6">
         <h1 className="text-2xl font-bold tracking-tight">vwealty</h1>
@@ -49,8 +50,8 @@ const Sidebar = ({ userName }: SidebarProps) => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth ${
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                   }`
                 }
               >
@@ -73,8 +74,8 @@ const Sidebar = ({ userName }: SidebarProps) => {
             </p>
           </div>
         </div>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           className="w-full bg-sidebar-foreground/10 hover:bg-sidebar-foreground/20 text-sidebar-foreground"
         >
           Contact us

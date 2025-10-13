@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Setup from "./pages/Setup";
 import Dashboard from "./pages/Dashboard";
+import Accounts from "./pages/Accounts";
 import Budgets from "./pages/Budgets";
 import Expenses from "./pages/Expenses";
 import Investments from "./pages/Investments";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/setup" element={<Setup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/accounts" element={<Accounts />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/investments" element={<Investments />} />

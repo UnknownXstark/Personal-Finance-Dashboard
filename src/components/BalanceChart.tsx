@@ -6,7 +6,7 @@ import { mockBalanceHistory } from '@/data/mockData';
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 
 const BalanceChart = () => {
-  const [period, setPeriod] = useState<Period>('Year');
+  const [period, setPeriod] = useState<Period>('Month');
 
   const periods: Period[] = ['Day', 'Week', 'Month', 'Year'];
 

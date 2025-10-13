@@ -1,0 +1,144 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "@/components/Sidebar";
+import DashboardHeader from "@/components/DashboardHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus, Wallet } from "lucide-react";
+import { accountsAPI } from "@/lib/api";
+import { AccountForm } from "@/components/forms/AccountForm";
+
+interface Account {
+  id: number;
+  owner_id: number;
+  name: string;
+  account_type: string;
+  balance: number;
+  created_at: string;
+}
+
+const Accounts = () => {
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState("User");
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    const userData = JSON.parse(user);
+    setUserName(userData.name);
+
+    fetchAccounts();
+  }, [navigate]);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await accountsAPI.getAll();
+      setAccounts(response.data);
+    } catch (error) {
+      console.error("Error fetching accounts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatAccountType = (type: string) => {
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      <Sidebar userName={userName} />
+
+      <div className="flex-1 flex flex-col ml-60 h-screen overflow-auto">
+        <DashboardHeader userName={userName} />
+
+        <main className="flex-1 p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Accounts</h1>
+              <p className="text-muted-foreground">
+                Manage your financial accounts
+              </p>
+            </div>
+            <Button className="gap-2" onClick={() => setFormOpen(true)}>
+              <Plus size={20} />
+              New Account
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Loading accounts...</p>
+            </div>
+          ) : accounts.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground">
+                  No accounts yet. Create your first account to get started!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {accounts.map((account) => (
+                <Card
+                  key={account.id}
+                  className="hover:shadow-lg transition-smooth"
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
+                        <Wallet className="text-accent" size={24} />
+                      </div>
+                      <span className="text-sm text-muted-foreground capitalize">
+                        {formatAccountType(account.account_type)}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardTitle className="text-xl mb-4">
+                      {account.name}
+                    </CardTitle>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Balance
+                        </span>
+                        <span className="text-2xl font-bold">
+                          ${account.balance.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Created</span>
+                        <span>
+                          {new Date(account.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          <AccountForm
+            open={formOpen}
+            onOpenChange={setFormOpen}
+            onSuccess={fetchAccounts}
+          />
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default Accounts;
