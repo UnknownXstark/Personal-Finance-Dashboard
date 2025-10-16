@@ -1,11 +1,22 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { transactionsAPI } from '@/lib/api';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { transactionsAPI } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface TransactionFormProps {
   open: boolean;
@@ -13,16 +24,21 @@ interface TransactionFormProps {
   onSuccess: () => void;
 }
 
-export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFormProps) => {
+export const TransactionForm = ({
+  open,
+  onOpenChange,
+  onSuccess,
+}: TransactionFormProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
   const [formData, setFormData] = useState({
-    name: '',
-    amount: '',
-    account_id: '1',
-    transaction_type: 'debit',
-    category: '',
-    description: '',
+    name: "",
+    amount: "",
+    account_id: "1",
+    transaction_type: "debit",
+    category: "",
+    description: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,6 +46,19 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
     setLoading(true);
 
     try {
+      // ✅ get owner_id from localStorage
+      const user = localStorage.getItem("user");
+      const owner_id = user ? JSON.parse(user).id : null;
+
+      if (!owner_id) {
+        toast({
+          title: "Error",
+          description: "User not found. Please log in again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await transactionsAPI.create({
         name: formData.name,
         amount: parseFloat(formData.amount),
@@ -38,6 +67,7 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
         category: formData.category,
         description: formData.description,
         transaction_date: new Date().toISOString(),
+        owner_id, // ✅ added
       });
 
       toast({
@@ -47,19 +77,30 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
 
       onSuccess();
       onOpenChange(false);
+
       setFormData({
-        name: '',
-        amount: '',
-        account_id: '1',
-        transaction_type: 'debit',
-        category: '',
-        description: '',
+        name: "",
+        amount: "",
+        account_id: "1",
+        transaction_type: "debit",
+        category: "",
+        description: "",
       });
     } catch (error: any) {
+      // ✅ handle 422 or other validation errors safely
+      const detail = error.response?.data?.detail;
+      let message = "Failed to create transaction";
+
+      if (Array.isArray(detail)) {
+        message = detail.map((err: any) => err.msg).join(", ");
+      } else if (typeof detail === "string") {
+        message = detail;
+      }
+
       toast({
         title: "Error",
-        description: error.response?.data?.detail || "Failed to create transaction",
-        variant: "destructive"
+        description: message,
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -72,13 +113,16 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
         <DialogHeader>
           <DialogTitle>New Transaction</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Transaction Name</Label>
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               required
             />
           </div>
@@ -90,14 +134,21 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
               type="number"
               step="0.01"
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: e.target.value })
+              }
               required
             />
           </div>
 
           <div>
             <Label htmlFor="type">Type</Label>
-            <Select value={formData.transaction_type} onValueChange={(value) => setFormData({ ...formData, transaction_type: value })}>
+            <Select
+              value={formData.transaction_type}
+              onValueChange={(value) =>
+                setFormData({ ...formData, transaction_type: value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -113,7 +164,9 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
             <Input
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
             />
           </div>
 
@@ -122,16 +175,22 @@ export const TransactionForm = ({ open, onOpenChange, onSuccess }: TransactionFo
             <Input
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
             />
           </div>
 
           <div className="flex gap-3 justify-end">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Transaction'}
+              {loading ? "Creating..." : "Create Transaction"}
             </Button>
           </div>
         </form>

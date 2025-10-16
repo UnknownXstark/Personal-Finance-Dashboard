@@ -61,7 +61,7 @@ const Expenses = () => {
 
   // Group by category for charts
   const expensesByCategory = expenseTransactions.reduce((acc: any, t: any) => {
-    const category = t.category_id || "Other";
+    const category = t.category || "Other";
     if (!acc[category]) {
       acc[category] = { category, amount: 0, percentage: 0 };
     }
