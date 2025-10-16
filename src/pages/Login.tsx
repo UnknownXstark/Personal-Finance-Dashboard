@@ -5,32 +5,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { authAPI } from '@/lib/api';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple mock authentication
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
+    setLoading(true);
+    try {
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // Store JWT token and user data
+      localStorage.setItem('access_token', response.data.access_token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
       toast({
         title: "Welcome back!",
-        description: "Redirecting to your dashboard..."
+        description: "Let's set up your first account..."
       });
-      navigate('/dashboard');
-    } else {
+      
+      // Redirect to onboarding to create first account
+      navigate('/onboarding/create-account');
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Invalid credentials. Please register first.",
+        title: "Login Failed",
+        description: error.response?.data?.detail || "Invalid credentials",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,9 +85,9 @@ const Login = () => {
               />
             </div>
             
-            <Button type="submit" className="w-full">
-              Sign In
-            </Button>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
             
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>
