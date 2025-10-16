@@ -55,6 +55,9 @@ export const accountsAPI = {
   
   getById: (id: number) =>
     api.get(`${API_BASE_URL}/accounts/${id}`),
+  
+  delete: (id: number) =>
+    api.delete(`${API_BASE_URL}/accounts/${id}`),
 };
 
 // Transactions API
@@ -87,6 +90,12 @@ export const budgetsAPI = {
   
   getByUser: (userId: number) =>
     api.get(`${API_BASE_URL}/budgets/user/${userId}`),
+  
+  update: (id: number, data: { limit_amount?: number; period?: string }) =>
+    api.put(`${API_BASE_URL}/budgets/${id}`, data),
+  
+  delete: (id: number) =>
+    api.delete(`${API_BASE_URL}/budgets/${id}`),
 };
 
 // Investments API

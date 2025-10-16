@@ -1,47 +1,57 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { authAPI } from '@/lib/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { authAPI } from "@/lib/api";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setLoading(true);
     try {
       const response = await authAPI.login({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
-      
+
       // Store JWT token and user data
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem("access_token", response.data.access_token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
       toast({
         title: "Welcome back!",
-        description: "Let's set up your first account..."
+        description: "Let's set up your first account...",
       });
-      
+
       // Redirect to onboarding to create first account
-      navigate('/onboarding/create-account');
+      navigate("/onboarding/create-account");
     } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: error.response?.data?.detail || "Invalid credentials",
-        variant: "destructive"
+        description: Array.isArray(error.response?.data?.detail)
+          ? error.response.data.detail.map((d: any) => d.msg).join(", ")
+          : typeof error.response?.data?.detail === "object"
+          ? JSON.stringify(error.response.data.detail)
+          : error.response?.data?.detail || "Invalid credentials",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -56,9 +66,7 @@ const Login = () => {
             <h1 className="text-3xl font-bold text-primary">vwealty</h1>
           </div>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue
-          </CardDescription>
+          <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,31 +77,37 @@ const Login = () => {
                 type="email"
                 placeholder="ashley@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 required
               />
             </div>
-            
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
-              </Button>
-            
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
+            </Button>
+
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
+              <span className="text-muted-foreground">
+                Don't have an account?{" "}
+              </span>
               <button
                 type="button"
-                onClick={() => navigate('/register')}
+                onClick={() => navigate("/register")}
                 className="text-accent hover:underline font-medium"
               >
                 Sign up

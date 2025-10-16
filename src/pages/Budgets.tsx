@@ -5,17 +5,33 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import { budgetsAPI } from "@/lib/api";
 import { BudgetForm } from "@/components/forms/BudgetForm";
+import { BudgetEditForm } from "@/components/forms/BudgetEditorForm";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Budgets = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [userName, setUserName] = useState("User");
   const [userId, setUserId] = useState<number>(1);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
+  const [editFormOpen, setEditFormOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedBudget, setSelectedBudget] = useState<any>(null);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -38,6 +54,40 @@ const Budgets = () => {
       console.error("Error fetching budgets:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditClick = (budget: any) => {
+    setSelectedBudget(budget);
+    setEditFormOpen(true);
+  };
+
+  const handleDeleteClick = (budget: any) => {
+    setSelectedBudget(budget);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedBudget) return;
+
+    try {
+      await budgetsAPI.delete(selectedBudget.id);
+
+      toast({
+        title: "Success",
+        description: "Budget deleted successfully",
+      });
+
+      fetchBudgets(userId);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.detail || "Failed to delete budget",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedBudget(null);
     }
   };
 
@@ -83,9 +133,27 @@ const Budgets = () => {
                 const isOverLimit = percentage > 100;
 
                 return (
-                  <Card key={budget.id}>
+                  <Card key={budget.id} className="relative">
+                    <div className="absolute top-3 right-3 flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleEditClick(budget)}
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteClick(budget)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
                     <CardHeader>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between pr-16">
                         <CardTitle className="text-lg">
                           {budget.category_id}
                         </CardTitle>
@@ -145,6 +213,37 @@ const Budgets = () => {
             onOpenChange={setFormOpen}
             onSuccess={() => fetchBudgets(userId)}
           />
+
+          <BudgetEditForm
+            open={editFormOpen}
+            onOpenChange={setEditFormOpen}
+            onSuccess={() => fetchBudgets(userId)}
+            budget={selectedBudget}
+          />
+
+          <AlertDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this budget? This action
+                  cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfirm}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </main>
       </div>
     </div>

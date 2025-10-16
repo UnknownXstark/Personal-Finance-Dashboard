@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,67 +18,63 @@ import {
 import { budgetsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
-interface BudgetFormProps {
+interface BudgetEditFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  budget: {
+    id: number;
+    category_id: string;
+    limit_amount: number;
+    period: string;
+  } | null;
 }
 
-export const BudgetForm = ({
+export const BudgetEditForm = ({
   open,
   onOpenChange,
   onSuccess,
-}: BudgetFormProps) => {
+  budget,
+}: BudgetEditFormProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    category: "",
     limit_amount: "",
     period: "monthly",
   });
 
+  useEffect(() => {
+    if (budget) {
+      setFormData({
+        limit_amount: budget.limit_amount.toString(),
+        period: budget.period,
+      });
+    }
+  }, [budget]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!budget) return;
+
     setLoading(true);
 
     try {
-      // get logged in user id from localStorage (make sure you store user.id during login)
-      const user = localStorage.getItem("user");
-      const parsed = user ? JSON.parse(user) : null;
-      const owner_id = parsed?.id;
-      if (!owner_id) throw new Error("User not authenticated");
-
-      await budgetsAPI.create({
-        owner_id,
-        category: formData.category,
+      await budgetsAPI.update(budget.id, {
         limit_amount: parseFloat(formData.limit_amount),
         period: formData.period,
       });
 
       toast({
         title: "Success",
-        description: "Budget created successfully!",
+        description: "Budget updated successfully!",
       });
 
       onSuccess();
       onOpenChange(false);
-      setFormData({
-        category: "",
-        limit_amount: "",
-        period: "monthly",
-      });
     } catch (error: any) {
-      // Normalize validation errors from FastAPI
-      const detail = error?.response?.data?.detail;
-      const message = Array.isArray(detail)
-        ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ")
-        : error?.response?.data?.detail ||
-          error?.message ||
-          "Failed to create budget";
-
       toast({
         title: "Error",
-        description: message,
+        description: error.response?.data?.detail || "Failed to update budget",
         variant: "destructive",
       });
     } finally {
@@ -90,22 +86,9 @@ export const BudgetForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Budget</DialogTitle>
+          <DialogTitle>Edit Budget - {budget?.category_id}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              placeholder="e.g., Food & Dining"
-              required
-            />
-          </div>
-
           <div>
             <Label htmlFor="limit">Limit Amount</Label>
             <Input
@@ -149,7 +132,7 @@ export const BudgetForm = ({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Budget"}
+              {loading ? "Updating..." : "Update Budget"}
             </Button>
           </div>
         </form>
