@@ -46,7 +46,6 @@ export const TransactionForm = ({
     setLoading(true);
 
     try {
-      // ✅ get owner_id from localStorage
       const user = localStorage.getItem("user");
       const owner_id = user ? JSON.parse(user).id : null;
 
@@ -67,7 +66,7 @@ export const TransactionForm = ({
         category: formData.category,
         description: formData.description,
         transaction_date: new Date().toISOString(),
-        owner_id, // ✅ added
+        owner_id,
       });
 
       toast({
@@ -87,7 +86,6 @@ export const TransactionForm = ({
         description: "",
       });
     } catch (error: any) {
-      // ✅ handle 422 or other validation errors safely
       const detail = error.response?.data?.detail;
       let message = "Failed to create transaction";
 

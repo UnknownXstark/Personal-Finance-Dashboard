@@ -20,6 +20,7 @@ const Dashboard = () => {
     total_budget: 0,
   });
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [activeAccount, setActiveAccount] = useState<any>(null);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -44,6 +45,17 @@ const Dashboard = () => {
 
       setOverview(overviewRes.data);
       setAccounts(accountsRes.data);
+
+      // Set active account based on localStorage
+      const activeAccountId = localStorage.getItem("activeAccountId");
+      if (activeAccountId && accountsRes.data.length > 0) {
+        const active = accountsRes.data.find(
+          (acc: any) => acc.id === Number(activeAccountId)
+        );
+        setActiveAccount(active || accountsRes.data[0]);
+      } else if (accountsRes.data.length > 0) {
+        setActiveAccount(accountsRes.data[0]);
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -75,8 +87,8 @@ const Dashboard = () => {
                   iconBg="bg-accent/10"
                 />
                 <StatCard
-                  title="Main Account"
-                  value={`$${accounts[0]?.balance.toLocaleString() || 0}`}
+                  title={activeAccount?.name || "Active Account"}
+                  value={`$${activeAccount?.balance.toLocaleString() || 0}`}
                   change={2.1}
                   icon={Wallet}
                   iconBg="bg-accent/10"

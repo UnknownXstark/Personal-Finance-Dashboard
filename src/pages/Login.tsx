@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { authAPI } from "@/lib/api";
+import { authAPI, accountsAPI } from "@/lib/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -36,21 +36,33 @@ const Login = () => {
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      toast({
-        title: "Welcome back!",
-        description: "Let's set up your first account...",
-      });
+      // Check if user already has accounts
+      const accountsResponse = await accountsAPI.getAll();
+      const userAccounts = accountsResponse.data;
 
-      // Redirect to onboarding to create first account
-      navigate("/onboarding/create-account");
+      if (userAccounts && userAccounts.length > 0) {
+        // User has accounts, set first as active and go to dashboard
+        localStorage.setItem("activeAccountId", userAccounts[0].id.toString());
+
+        toast({
+          title: "Welcome back!",
+          description: `Logged in successfully`,
+        });
+
+        navigate("/dashboard");
+      } else {
+        // No accounts, go to create account page
+        toast({
+          title: "Welcome back!",
+          description: "Let's set up your first account...",
+        });
+
+        navigate("/onboarding/create-account");
+      }
     } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: Array.isArray(error.response?.data?.detail)
-          ? error.response.data.detail.map((d: any) => d.msg).join(", ")
-          : typeof error.response?.data?.detail === "object"
-          ? JSON.stringify(error.response.data.detail)
-          : error.response?.data?.detail || "Invalid credentials",
+        description: error.response?.data?.detail || "Invalid credentials",
         variant: "destructive",
       });
     } finally {

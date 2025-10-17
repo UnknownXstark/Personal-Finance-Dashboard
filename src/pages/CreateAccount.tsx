@@ -43,13 +43,16 @@ const CreateAccount = () => {
         throw new Error("User not authenticated");
       }
 
-      await accountsAPI.create({
+      const response = await accountsAPI.create({
         owner_id: userData.id,
         name: formData.name,
         account_type: formData.account_type,
         currency: formData.currency,
         balance: parseFloat(formData.balance),
       });
+
+      // Set this account as active
+      localStorage.setItem("activeAccountId", response.data.id.toString());
 
       toast({
         title: "🎉 Account created successfully!",
