@@ -1,18 +1,18 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
 // Add JWT token to all requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,9 +28,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -40,82 +40,90 @@ api.interceptors.response.use(
 export const authAPI = {
   register: (data: { name: string; email: string; password: string }) =>
     api.post(`${API_BASE_URL}/auth/register`, data),
-
+  
   login: (data: { email: string; password: string }) =>
     api.post(`${API_BASE_URL}/auth/login`, data),
 };
 
 // Accounts API
 export const accountsAPI = {
-  create: (data: {
-    owner_id: number;
-    name: string;
-    account_type: string;
-    currency?: string;
-    balance: number;
-  }) => api.post(`${API_BASE_URL}/accounts/new`, data),
-
-  getAll: () => api.get(`${API_BASE_URL}/accounts/all`),
-
-  getById: (id: number) => api.get(`${API_BASE_URL}/accounts/${id}`),
-
-  delete: (id: number) => api.delete(`${API_BASE_URL}/accounts/${id}`),
+  create: (data: { owner_id: number; name: string; account_type: string; currency?: string; balance: number }) =>
+    api.post(`${API_BASE_URL}/accounts/new`, data),
+  
+  getAll: () =>
+    api.get(`${API_BASE_URL}/accounts/all`),
+  
+  getById: (id: number) =>
+    api.get(`${API_BASE_URL}/accounts/${id}`),
+  
+  delete: (id: number) =>
+    api.delete(`${API_BASE_URL}/accounts/${id}`),
 };
 
 // Transactions API
 export const transactionsAPI = {
-  create: (data: {
+  create: (data: { 
     name: string;
-    owner_id: number;
     amount: number;
     account_id: number;
     transaction_type: string;
-    category?: string;
+    category_id?: number;
     description?: string;
     transaction_date: string;
-  }) => api.post(`${API_BASE_URL}/transactions/new`, data),
-
-  getAll: () => api.get(`${API_BASE_URL}/transactions/all`),
-
+  }) =>
+    api.post(`${API_BASE_URL}/transactions/new`, data),
+  
+  getAll: () =>
+    api.get(`${API_BASE_URL}/transactions/all`),
+  
   getByAccount: (accountId: number) =>
     api.get(`${API_BASE_URL}/transactions/account/${accountId}`),
-
-  delete: (id: number) => api.delete(`${API_BASE_URL}/transactions/${id}`),
+  
+  delete: (id: number) =>
+    api.delete(`${API_BASE_URL}/transactions/${id}`),
 };
 
 // Budgets API
 export const budgetsAPI = {
   create: (data: { category: string; limit_amount: number; period?: string }) =>
     api.post(`${API_BASE_URL}/budgets/new`, data),
-
+  
   getByUser: (userId: number) =>
     api.get(`${API_BASE_URL}/budgets/user/${userId}`),
-
+  
   update: (id: number, data: { limit_amount?: number; period?: string }) =>
     api.put(`${API_BASE_URL}/budgets/${id}`, data),
-
-  delete: (id: number) => api.delete(`${API_BASE_URL}/budgets/${id}`),
+  
+  delete: (id: number) =>
+    api.delete(`${API_BASE_URL}/budgets/${id}`),
 };
 
 // Investments API
 export const investmentsAPI = {
-  create: (data: {
-    name: string;
-    category: string;
-    amount: number;
-    created_at: string;
-  }) => api.post(`${API_BASE_URL}/investments/new`, data),
+  create: (data: { name: string; category: string; amount: number; created_at: string }) =>
+    api.post(`${API_BASE_URL}/investments/new`, data),
+  
+  getAll: () =>
+    api.get(`${API_BASE_URL}/investments/all`),
+  
+  getSummary: () =>
+    api.get(`${API_BASE_URL}/investments/summary`),
+};
 
-  getAll: () => api.get(`${API_BASE_URL}/investments/all`),
-
-  getSummary: () => api.get(`${API_BASE_URL}/investments/summary`),
+// Categories API
+export const categoriesAPI = {
+  getAll: () =>
+    api.get(`${API_BASE_URL}/categories/`),
+  
+  create: (data: { name: string }) =>
+    api.post(`${API_BASE_URL}/categories/`, data),
 };
 
 // Reports API
 export const reportsAPI = {
   getOverview: (userId: number) =>
     api.get(`${API_BASE_URL}/reports/overview?user_id=${userId}`),
-
+  
   getMonthlySummary: (userId: number) =>
     api.get(`${API_BASE_URL}/reports/monthly-summary?user_id=${userId}`),
 };
