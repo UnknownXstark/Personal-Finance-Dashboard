@@ -81,21 +81,21 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <StatCard
                   title="Total Balance"
-                  value={`$${overview.total_balance.toLocaleString()}`}
+                  value={`₦${overview.total_balance.toLocaleString()}`}
                   change={5.2}
                   icon={Wallet}
                   iconBg="bg-accent/10"
                 />
                 <StatCard
                   title={activeAccount?.name || "Active Account"}
-                  value={`$${activeAccount?.balance.toLocaleString() || 0}`}
+                  value={`₦${activeAccount?.balance.toLocaleString() || 0}`}
                   change={2.1}
                   icon={Wallet}
                   iconBg="bg-accent/10"
                 />
                 <StatCard
                   title="Total Investments"
-                  value={`$${overview.total_investments.toLocaleString()}`}
+                  value={`₦${overview.total_investments.toLocaleString()}`}
                   change={10}
                   icon={TrendingUp}
                   iconBg="bg-success/10"

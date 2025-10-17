@@ -132,7 +132,7 @@ const TransactionsTable = () => {
                           : "stat-positive"
                       }`}
                     >
-                      {transaction.type === "debit" ? "-" : "+"}$
+                      {transaction.type === "debit" ? "-" : "+"}₦
                       {Math.abs(transaction.amount).toFixed(2)}
                     </td>
                   </tr>

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { investmentsAPI } from '@/lib/api';
-import { MoreVertical } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { investmentsAPI } from "@/lib/api";
+import { MoreVertical } from "lucide-react";
 
-const COLORS = ['#4FD1C5', '#63B3ED', '#F6E05E', '#9F7AEA'];
+const COLORS = ["#4FD1C5", "#63B3ED", "#F6E05E", "#9F7AEA"];
 
 interface Investment {
   id: number;
@@ -29,20 +29,22 @@ const InvestmentsChart = () => {
       const response = await investmentsAPI.getAll();
       setInvestments(response.data.slice(0, 4)); // Show top 4
     } catch (error) {
-      console.error('Error fetching investments:', error);
+      console.error("Error fetching investments:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const totalReturn = investments.reduce((sum, inv) => sum + inv.amount, 0);
-  const avgPercentage = investments.length > 0 
-    ? investments.reduce((sum, inv) => sum + inv.percentage, 0) / investments.length 
-    : 0;
+  const avgPercentage =
+    investments.length > 0
+      ? investments.reduce((sum, inv) => sum + inv.percentage, 0) /
+        investments.length
+      : 0;
 
-  const chartData = investments.map(inv => ({
+  const chartData = investments.map((inv) => ({
     name: inv.name,
-    value: inv.amount
+    value: inv.amount,
   }));
 
   return (
@@ -55,7 +57,7 @@ const InvestmentsChart = () => {
           </button>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {loading ? (
           <div className="flex items-center justify-center h-48">
@@ -80,31 +82,43 @@ const InvestmentsChart = () => {
                   dataKey="value"
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
-            
+
             <div className="text-center mt-4">
               <p className="text-sm text-muted-foreground">Return</p>
               <p className="text-2xl font-bold mt-1 stat-positive">
-                +${totalReturn.toFixed(2)}
+                +₦{totalReturn.toFixed(2)}
               </p>
-              <p className="text-sm stat-positive mt-1">+{avgPercentage.toFixed(2)}%</p>
+              <p className="text-sm stat-positive mt-1">
+                +{avgPercentage.toFixed(2)}%
+              </p>
             </div>
-            
+
             <div className="mt-6 space-y-3">
               {investments.map((investment, index) => (
-                <div key={investment.id} className="flex items-center justify-between">
+                <div
+                  key={investment.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-2">
-                    <div 
+                    <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                    <span className="text-sm font-medium">{investment.name}</span>
+                    <span className="text-sm font-medium">
+                      {investment.name}
+                    </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">{investment.percentage}%</span>
+                  <span className="text-sm text-muted-foreground">
+                    {investment.percentage}%
+                  </span>
                 </div>
               ))}
             </div>

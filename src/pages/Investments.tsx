@@ -81,7 +81,7 @@ const Investments = () => {
                       Total Value
                     </p>
                     <h3 className="text-3xl font-bold mb-2">
-                      ${summary.total_amount.toLocaleString()}
+                      ₦{summary.total_amount.toLocaleString()}
                     </h3>
                     <p className="text-sm stat-positive">
                       +{summary.average_percentage.toFixed(1)}%
@@ -152,7 +152,7 @@ const Investments = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg">
-                              ${investment.amount.toFixed(2)}
+                              ₦{investment.amount.toFixed(2)}
                             </p>
                             <p className="text-sm stat-positive">
                               +{investment.percentage}%

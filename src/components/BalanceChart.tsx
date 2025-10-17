@@ -6,7 +6,7 @@ import { mockBalanceHistory } from '@/data/mockData';
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 
 const BalanceChart = () => {
-  const [period, setPeriod] = useState<Period>('Month');
+  const [period, setPeriod] = useState<Period>('Year');
 
   const periods: Period[] = ['Day', 'Week', 'Month', 'Year'];
 
@@ -46,7 +46,7 @@ const BalanceChart = () => {
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={(value) => `₦${value}`}
             />
             <Tooltip 
               contentStyle={{
@@ -54,7 +54,7 @@ const BalanceChart = () => {
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px'
               }}
-              formatter={(value: number) => [`$${value}`, 'Balance']}
+              formatter={(value: number) => [`₦${value}`, 'Balance']}
             />
             <Line 
               type="monotone" 
@@ -69,7 +69,7 @@ const BalanceChart = () => {
         
         <div className="mt-4 text-center">
           <p className="text-sm text-muted-foreground">28 Jun</p>
-          <p className="text-2xl font-bold mt-1">$1,892</p>
+          <p className="text-2xl font-bold mt-1">₦1,892</p>
         </div>
       </CardContent>
     </Card>
